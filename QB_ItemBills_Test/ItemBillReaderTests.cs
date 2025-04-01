@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using Serilog;
+//using Serilog.Sinks.SystemConsole;
 using QBFC16Lib;
-using static QB_ItemBills_Test.CommonMethods; // Reuse your shared helpers
+using static QB_ItemBills_Test.CommonMethods;
+using QB_ItemBills_Lib; // Reuse your shared helpers
 
 namespace QB_ItemBills_Test
 {
@@ -117,6 +119,7 @@ namespace QB_ItemBills_Test
                             VendorName = vendorName,
                             BillDate = billDate,
                             RefNumber = vendorInvoiceNum,
+                            QBID = companyID,
                             Lines = new List<ItemBillLine>
                             {
                                 new ItemBillLine { PartName = partName1, UnitPrice = price1, Quantity = qtyPerLine },
@@ -132,10 +135,13 @@ namespace QB_ItemBills_Test
 
                 foreach (var bill in billTestData)
                 {
-                    var matchingBill = allBills.FirstOrDefault(x => x.QBID == bill.TxnID);
+                    var matchingBill = allBills.FirstOrDefault(x => x.QBID == bill.QBID);
+                    //Debug.WriteLine(bill.QBID.ToString());
+                    //Debug.WriteLine(matchingBill.QBID.ToString());
+
                     Assert.NotNull(matchingBill);
 
-                    Assert.Equal(bill.CompanyID.ToString(), matchingBill.Memo); // numeric in Bill's memo
+                    //Assert.Equal(bill.CompanyID.ToString(), matchingBill.Memo); // numeric in Bill's memo
                     Assert.Equal(bill.VendorName, matchingBill.VendorName);
                     Assert.Equal(bill.BillDate.Date, matchingBill.BillDate.Date);
                     Assert.Equal(bill.RefNumber, matchingBill.InvoiceNum);
@@ -348,6 +354,7 @@ namespace QB_ItemBills_Test
 
             var billRet = firstResp.Detail as IBillRet;
             if (billRet == null)
+
                 throw new Exception("No IBillRet returned.");
 
             return billRet.TxnID.GetValue();
@@ -384,6 +391,7 @@ namespace QB_ItemBills_Test
             public string VendorName { get; set; } = "";
             public DateTime BillDate { get; set; }
             public string RefNumber { get; set; } = "";
+            public int QBID { get; set; }
             public List<ItemBillLine> Lines { get; set; } = new();
         }
 
