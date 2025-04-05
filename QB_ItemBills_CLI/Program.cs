@@ -1,67 +1,9 @@
-﻿//using System;
-//using QB_ItemBills_Lib;
-
-//namespace QB_ItemBills_CLI
-//{
-//    class Program
-//    {
-//        static void Main()
-//        {
-//            ItemBillReader.QueryAllItemBills();
-
-//            //foreach (var bill in bills)
-//            //{
-//            //    Console.WriteLine("-------------------------------------------------");
-//            //    Console.WriteLine($"Vendor:         {bill.Vendor}");
-//            //    Console.WriteLine($"Date:           {bill.Date}");
-//            //    Console.Write("Part's names:   ");
-//            //    Console.WriteLine(string.Join(", ", bill.Parts.ConvertAll(p => p.Name)));
-//            //    Console.Write("Part's quantity:");
-//            //    Console.WriteLine(" " + string.Join(", ", bill.Parts.ConvertAll(p => p.Quantity.ToString())));
-//            //    Console.WriteLine($"Ref Number:     {bill.RefNumber}");
-//            //    Console.WriteLine("-------------------------------------------------\n");
-//            //}
-
-//            //Console.WriteLine("Press any key to exit...");
-//            //Console.ReadKey();
-//        }
-//    }
-//}
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using QB_ItemBills_Lib;
 using System;
 using QB_ItemBills_Lib;
 
-//namespace QB_ItemBills_CLI
-//{
-//    class Program
-//    {
-//        static void Main()
-//        {
-//            Console.WriteLine("WARNING: This will delete ALL bills in QuickBooks!");
-//            Console.WriteLine("Make sure you have a backup of your QuickBooks file.");
-//            Console.Write("Do you want to continue? (Y/N): ");
-
-//            var key = Console.ReadKey();
-//            Console.WriteLine();
-
-//            if (key.Key == ConsoleKey.Y)
-//            {
-//                Console.WriteLine("\nDeleting all bills in QuickBooks...");
-//                BillDeleter.DeleteAllBills();
-//            }
-//            else
-//            {
-//                Console.WriteLine("\nOperation cancelled.");
-//            }
-
-//            Console.WriteLine("\nPress any key to exit...");
-//            Console.ReadKey();
-//        }
-//    }
-//}
 namespace QB_ItemBills_CLI
 {
     class Program
