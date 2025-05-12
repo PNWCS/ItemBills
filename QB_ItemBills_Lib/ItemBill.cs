@@ -12,6 +12,8 @@ namespace QB_ItemBills_Lib
         public string Memo { get; set; } = string.Empty; // Stores the CompanyID
         public int QBID { get; set; } // This is likely used as an internal identifier
         public List<ItemBillLine> Lines { get; set; } = new List<ItemBillLine>();
+        public ItemBillStatus Status { get; set; } = ItemBillStatus.Unchanged;
+        //public ItemBillStatus Status { get; set; }
     }
 
     public class ItemBillLine
@@ -19,6 +21,7 @@ namespace QB_ItemBills_Lib
         public string PartName { get; set; } = string.Empty;
         public double UnitPrice { get; set; }
         public int Quantity { get; set; }
+        public ItemBillStatus Status { get; set; }
     }
 }
 

@@ -1,64 +1,104 @@
 ﻿using System;
 using System.Collections.Generic;
-using QB_ItemBills_Lib;
-using System;
+using System.IO;
 using QB_ItemBills_Lib;
 
 namespace QB_ItemBills_CLI
 {
-    class Program
+    public class Program
     {
-        static void Main()
+        public static void Main(string[] args)
         {
-            Console.WriteLine("Querying QuickBooks for Item Bills...");
-            Console.WriteLine("====================================");
+            Console.WriteLine("QuickBooks Item Bill CLI");
+            Console.WriteLine("=========================");
+            Console.WriteLine("Select an action:");
+            Console.WriteLine("1 - Query and Add Item Bills manually");
+            Console.WriteLine("2 - Compare Excel and QuickBooks (both directions), and Add Missing Bills");
+            Console.Write("Choice (1 or 2): ");
 
-            try
+            var choice = Console.ReadLine();
+
+            switch (choice)
             {
-                // Call the QueryAllItemBills method
-                List<ItemBill> bills = ItemBillReader.QueryAllItemBills();
-
-                // Display the results
-                if (bills.Count > 0)
-                {
-                    Console.WriteLine($"Found {bills.Count} bills in QuickBooks:\n");
-
-                    foreach (var bill in bills)
-                    {
-                        Console.WriteLine("-------------------------------------------------");
-                        Console.WriteLine($"Vendor:        {bill.VendorName}");
-                        Console.WriteLine($"Date:          {bill.BillDate.ToShortDateString()}");
-                        Console.WriteLine($"Invoice #:     {bill.InvoiceNum}");
-                        Console.WriteLine($"Company ID:    {bill.QBID}");
-
-                        if (bill.Lines.Count > 0)
-                        {
-                            Console.Write("Part's names:  ");
-                            Console.WriteLine(string.Join(", ", bill.Lines.ConvertAll(p => p.PartName)));
-
-                            Console.Write("Part's qty:    ");
-                            Console.WriteLine(string.Join(", ", bill.Lines.ConvertAll(p => p.Quantity.ToString())));
-
-                            Console.Write("Part's price:  ");
-                            Console.WriteLine(string.Join(", ", bill.Lines.ConvertAll(p => $"${p.UnitPrice:F2}")));
-                        }
-
-                        Console.WriteLine($"Transaction ID: {bill.TxnID}");
-                        Console.WriteLine("-------------------------------------------------\n");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("No item bills found in QuickBooks.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
+                case "1":
+                    ManualBillAddFlow();
+                    break;
+                case "2":
+                    CompareBothDirectionsFlow();
+                    break;
+                default:
+                    Console.WriteLine("Invalid choice.");
+                    break;
             }
 
-            Console.WriteLine("\nPress any key to exit...");
+            Console.WriteLine("\nProcess complete. Press any key to exit.");
             Console.ReadKey();
+        }
+
+        private static void ManualBillAddFlow()
+        {
+            const string excelPath = @"C:\Users\NagavarapuS\ItemBills\ItemBills.xlsx";
+            if (!File.Exists(excelPath))
+            {
+                Console.WriteLine("Excel file not found at hardcoded path.");
+                return;
+            }
+
+
+            var bills = ItemBillComparator.ReadBillsFromExcel(excelPath);
+            Console.WriteLine($"Read {bills.Count} item bills from Excel.");
+
+            Console.Write("Add all these to QuickBooks? (y/n): ");
+            var confirm = Console.ReadLine()?.Trim().ToLower();
+            if (confirm == "y")
+            {
+                BillAdder.AddBills(bills);
+                Console.WriteLine("Bills added to QuickBooks.");
+            }
+            else
+            {
+                Console.WriteLine("No bills were added.");
+            }
+        }
+
+        private static void CompareBothDirectionsFlow()
+        {
+            const string excelPath = @"C:\Users\NagavarapuS\ItemBills\ItemBills.xlsx";
+            if (!File.Exists(excelPath))
+            {
+                Console.WriteLine("Excel file not found at hardcoded path.");
+                return;
+            }
+
+            Console.WriteLine("\nQuickBooks Item Bill Comparator");
+            Console.WriteLine("===============================");
+
+            var excelBills = ItemBillComparator.ReadBillsFromExcel(excelPath);
+            var qbBills = ItemBillReader.QueryAllItemBills();
+
+            Console.WriteLine($"Read {excelBills.Count} item bills from Excel.");
+            Console.WriteLine($"Read {qbBills.Count} item bills from QuickBooks.");
+
+            var comparisonResults = ItemBillComparator.CompareBothDirections(excelBills, qbBills);
+
+            Console.WriteLine("Comparison Results:");
+            foreach (var result in comparisonResults)
+            {
+                Console.WriteLine($"Vendor: {result.ExcelBill?.VendorName ?? result.QuickBooksBill?.VendorName}, " +
+                                  $"Invoice: {result.ExcelBill?.InvoiceNum ?? result.QuickBooksBill?.InvoiceNum}, " +
+                                  $"Status: {result.Status}");
+            }
+
+            Console.Write("Do you want to add bills that are missing in QuickBooks? (y/n): ");
+            var answer = Console.ReadLine()?.Trim().ToLower();
+            if (answer == "y")
+            {
+                ItemBillComparator.AddMissingBillsToQB(comparisonResults);
+            }
+            else
+            {
+                Console.WriteLine("No bills were added.");
+            }
         }
     }
 }
